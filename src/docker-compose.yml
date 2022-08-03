@@ -1,0 +1,62 @@
+version: '3.4'
+
+networks:
+  user-portal-network:
+    driver: bridge
+
+services:
+  userportal.managementservice:
+    image: ${DOCKER_REGISTRY-}userportalmanagementservice
+    build:
+      context: .
+      dockerfile: UserPortal.ManagementService/Dockerfile
+    ports:
+      - "8000:80"
+    environment:
+      DefaultConnection: "host=management-postgres-db;port=5432;database=management_db;username=dbuser;password=dbpassword"
+    networks:
+      - user-portal-network
+
+  management-postgres-db:
+    image: postgres:lastest
+    ports:
+      - "15432:5432"
+    restart: always
+    volumes:
+      - management_db_volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "dbuser"
+      POSTGRES_PASSWORD: "dbpassword"
+      POSTGRES_DB: "management_db"
+    networks:
+      - user-portal-network
+
+  userportal.userservice:
+    image: ${DOCKER_REGISTRY-}userportaluserservice
+    build:
+      context: .
+      dockerfile: UserPortal.UserService/Dockerfile
+    ports:
+      - "8000:80"
+    environment:
+      DefaultConnection: "host=user-postgres-db;port=5432;database=user_db;username=dbuser;password=dbpassword"
+    networks:
+      - user-portal-network
+
+  user-postgres-db:
+    image: postgres:lastest
+    ports:
+      - "15432:5432"
+    restart: always
+    volumes:
+      - user_db_volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "dbuser"
+      POSTGRES_PASSWORD: "dbpassword"
+      POSTGRES_DB: "user_db"
+    networks:
+      - user-portal-network
+
+volumes:
+  user_db_volume:
+  management_db_volume:
