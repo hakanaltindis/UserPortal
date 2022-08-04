@@ -9,13 +9,20 @@ services:
     image: ${DOCKER_REGISTRY-}userportalmanagementservice
     depends_on:
       - "management-postgres"
+      - "rabbitmq"
     build:
       context: .
       dockerfile: UserPortal.ManagementService/Dockerfile
     ports:
       - "9000:80"
+    deploy:
+      mode: replicated
+      replicas: 3
     environment:
       DefaultConnection: "host=management-postgres;port=5432;database=management_db;username=dbuser;password=dbpassword"
+      RabbitMqHost: "rabbitmq"
+      RabbitMqUser: "guest"
+      RabbitMqPassowrd: "guest"
     networks:
       - user-portal-network
 
@@ -37,13 +44,20 @@ services:
     image: ${DOCKER_REGISTRY-}userportaluserservice
     depends_on:
       - "user-postgres"
+      - "rabbitmq"
     build:
       context: .
       dockerfile: UserPortal.UserService/Dockerfile
     ports:
       - "8000:80"
+    deploy:
+      mode: replicated
+      replicas: 2
     environment:
       DefaultConnection: "host=user-postgres;port=5432;database=user_db;username=dbuser;password=dbpassword"
+      RabbitMqHost: "rabbitmq"
+      RabbitMqUser: "guest"
+      RabbitMqPassowrd: "guest"
     networks:
       - user-portal-network
 
@@ -58,6 +72,14 @@ services:
       POSTGRES_USER: "dbuser"
       POSTGRES_PASSWORD: "dbpassword"
       POSTGRES_DB: "user_db"
+    networks:
+      - user-portal-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - user-portal-network
 

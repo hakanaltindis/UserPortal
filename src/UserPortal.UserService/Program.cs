@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using UserPortal.Shared.Extensions;
+using UserPortal.UserService;
 using UserPortal.UserService.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,10 +7,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.RegisterDbContext<UserDbContext>(builder.Configuration);
 
+builder.Services.RegisterRabbitMQ(builder.Configuration);
+
+builder.Services.RegisterBussinessServices(typeof(Program).Assembly, typeof(Program).Assembly);
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAutoMapper(typeof(UserServiceMapperProfile));
 
 var app = builder.Build();
 

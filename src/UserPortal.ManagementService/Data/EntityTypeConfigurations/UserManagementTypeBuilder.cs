@@ -22,10 +22,10 @@ namespace UserPortal.ManagementService.Data.EntityTypeConfigurations
       builder.Property(e => e.RegistrationStatus)
         .IsRequired();
 
-      builder.Property(e => e.ProviderSource)
+      builder.Property(e => e.SourceProvider)
         .IsRequired(false);
 
-      builder.Property(e => e.ProviderKey)
+      builder.Property(e => e.SourceKey)
         .IsRequired(false);
     }
   }

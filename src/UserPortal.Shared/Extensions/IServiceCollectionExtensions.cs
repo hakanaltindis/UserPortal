@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace UserPortal.Shared.Extensions
 {
@@ -11,18 +13,11 @@ namespace UserPortal.Shared.Extensions
     {
       var databaseProvider = configuration.GetSection(nameof(DatabaseProviderConfiguration)).Get<DatabaseProviderConfiguration>();
 
-      Console.WriteLine("ENVIRONMENT ======>>>>>>>>>> " + Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
-
       var defaultConnection = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")?.Equals("Production") ?? false
         ? Environment.GetEnvironmentVariable("DefaultConnection")
         : configuration.GetConnectionString("DefaultConnection");
 
-      Console.WriteLine("DEFAULT CONNECTION ==========>>>>>>>>>> " + defaultConnection);
-
-      if (string.IsNullOrWhiteSpace(defaultConnection))
-      {
-        throw new ArgumentNullException(nameof(defaultConnection), $"The {nameof(defaultConnection)} must be passed as DefaultConnection in Environment Variables");
-      }
+      ValidateEnvironmentVariable("DefaultConnection", defaultConnection);
 
       services.AddDbContext<TDbContext>(opt =>
       {
@@ -32,6 +27,85 @@ namespace UserPortal.Shared.Extensions
           sql.MigrationsHistoryTable("__EFMigrationsHistory", databaseProvider.DefaultSchema);
         });
       });
+
+      return services;
+    }
+
+    public static IServiceCollection RegisterRabbitMQ(this IServiceCollection services, IConfiguration configuration)
+    {
+      string? host, user, password;
+
+      if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+      {
+        host = Environment.GetEnvironmentVariable("RabbitMqHost");
+        user = Environment.GetEnvironmentVariable("RabbitMqUser");
+        password = Environment.GetEnvironmentVariable("RabbitMqPassowrd");
+      }
+      else
+      {
+        host = configuration.GetValue<string?>("RabbitMq:Host", null);
+        user = configuration.GetValue<string?>("RabbitMq:User", null);
+        password = configuration.GetValue<string?>("RabbitMq:Password", null);
+      }
+
+
+      ValidateEnvironmentVariable("RabbitMqHost", host);
+
+      ValidateEnvironmentVariable("RabbitMqUser", user);
+
+      ValidateEnvironmentVariable("RabbitMqPassowrd", password);
+
+      services.AddMassTransit(x =>
+      {
+        x.UsingRabbitMq((context, cfg) =>
+        {
+          cfg.Host(host, "/", h =>
+          {
+            h.Username(user);
+            h.Password(password);
+          });
+
+          cfg.ConfigureEndpoints(context);
+        });
+      });
+
+      services.AddOptions<MassTransitHostOptions>()
+        .Configure(opt =>
+        {
+          opt.WaitUntilStarted = true;
+          opt.StartTimeout = TimeSpan.FromSeconds(10);
+          opt.StopTimeout = TimeSpan.FromSeconds(30);
+        });
+
+      return services;
+    }
+
+    private static void ValidateEnvironmentVariable(string nameOfVariable, string? valueOfVariable)
+    {
+      if (string.IsNullOrWhiteSpace(valueOfVariable))
+      {
+        throw new ArgumentNullException(nameOfVariable, $"The {nameOfVariable} must be passed in Environment Variables");
+      }
+    }
+
+    public static IServiceCollection RegisterBussinessServices(this IServiceCollection services, Assembly serviceAssembly, Assembly implementationAssembly)
+    {
+      var typeOfIService = typeof(IBusinessService);
+
+      var interfaces = serviceAssembly.GetTypes()
+          .Where(t =>
+              typeOfIService.IsAssignableFrom(t)
+              && t.IsInterface
+              && t != typeOfIService);
+
+      foreach (var i in interfaces)
+      {
+        var typeOfImplementation = implementationAssembly.GetTypes().FirstOrDefault(t => i.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+        if (typeOfImplementation == null) continue;
+
+        services.AddScoped(i, typeOfImplementation);
+      }
+
 
       return services;
     }

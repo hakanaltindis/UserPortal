@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using UserPortal.ManagementService.Data;
 using UserPortal.ManagementService.Services;
 using UserPortal.Shared.Extensions;
@@ -12,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddGrpc();
 
 builder.Services.RegisterDbContext<ManagementDbContext>(builder.Configuration);
+
+builder.Services.RegisterRabbitMQ(builder.Configuration);
 
 var app = builder.Build();
 
