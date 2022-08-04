@@ -1,4 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using UserPortal.ManagementService.Data;
 using UserPortal.ManagementService.Services;
+using UserPortal.Shared.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddGrpc();
 
+builder.Services.RegisterDbContext<ManagementDbContext>(builder.Configuration);
+
 var app = builder.Build();
+
+app.ApplyMigration<ManagementDbContext>();
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<GreeterService>();

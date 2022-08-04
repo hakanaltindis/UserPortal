@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using UserPortal.ManagementService.Entities;
 using UserPortal.Shared;
-using UserPortal.UserService.Entities;
 
-namespace UserPortal.UserService.Data
+namespace UserPortal.ManagementService.Data
 {
-  public class UserDbContext : DbContext
+  public class ManagementDbContext : DbContext
   {
     private readonly IConfiguration _configuration;
 
-    public UserDbContext(DbContextOptions<UserDbContext> options
+    public ManagementDbContext(DbContextOptions<ManagementDbContext> options
       , IConfiguration configuration)
       : base(options)
     {
@@ -16,7 +16,7 @@ namespace UserPortal.UserService.Data
     }
 
 #nullable disable
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<UserManagement> UserManagements { get; set; }
 #nullable enable
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

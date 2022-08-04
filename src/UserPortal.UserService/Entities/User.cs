@@ -4,23 +4,11 @@ namespace UserPortal.UserService.Entities
 {
   public class User
   {
-    public int Id { get; set; }
-    public string? Username { get; set; }
-    public string? Password { get; set; }
-    public string? Email { get; set; }
-    public UserStatus Status { get; set; }
-    public RegistrationStatus RegistrationStatus { get; set; }
-  }
-
-  public enum UserStatus
-  {
-    Enable,
-    Disable,
-  }
-
-  public enum RegistrationStatus
-  {
-    WaitingForApproval,
-    Approved,
+    public virtual int Id { get; set; }
+    public virtual string? Username { get; set; }
+    public virtual string? Password { get; set; }
+    public virtual string? Email { get; set; }
+    public virtual UserStatus Status { get; set; }
+    public virtual RegistrationStatus RegistrationStatus { get; set; }
   }
 }

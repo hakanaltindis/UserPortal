@@ -19,4 +19,5 @@ RUN dotnet publish "UserPortal.ManagementService.csproj" -c Release -o /app/publ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "UserPortal.ManagementService.dll"]

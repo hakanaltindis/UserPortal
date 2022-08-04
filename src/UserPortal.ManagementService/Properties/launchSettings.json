@@ -2,9 +2,6 @@
   "profiles": {
     "UserPortal.ManagementService": {
       "commandName": "Project",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
       "applicationUrl": "http://localhost:5022;https://localhost:7022",
       "dotnetRunMessages": true
     },
