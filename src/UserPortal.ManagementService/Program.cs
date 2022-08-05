@@ -1,3 +1,5 @@
+using UserPortal.ManagementService;
+using UserPortal.ManagementService.Consumers;
 using UserPortal.ManagementService.Data;
 using UserPortal.ManagementService.Services;
 using UserPortal.Shared.Extensions;
@@ -12,7 +14,11 @@ builder.Services.AddGrpc();
 
 builder.Services.RegisterDbContext<ManagementDbContext>(builder.Configuration);
 
-builder.Services.RegisterRabbitMQ(builder.Configuration);
+builder.Services.RegisterRabbitMQ(builder.Configuration, typeof(UserServiceConsumer).Assembly);
+
+builder.Services.RegisterBussinessServices(typeof(Program).Assembly, typeof(Program).Assembly);
+
+builder.Services.AddAutoMapper(typeof(ManagementServiceMapperProfile));
 
 var app = builder.Build();
 

@@ -6,5 +6,6 @@ namespace UserPortal.UserService.Entities
   {
     WaitingForApproval,
     Approved,
+    Declined,
   }
 }

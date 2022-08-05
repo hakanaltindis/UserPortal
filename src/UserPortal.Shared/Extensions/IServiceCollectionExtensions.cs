@@ -31,7 +31,7 @@ namespace UserPortal.Shared.Extensions
       return services;
     }
 
-    public static IServiceCollection RegisterRabbitMQ(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection RegisterRabbitMQ(this IServiceCollection services, IConfiguration configuration, Assembly consumersAssembly = null)
     {
       string? host, user, password;
 
@@ -57,6 +57,21 @@ namespace UserPortal.Shared.Extensions
 
       services.AddMassTransit(x =>
       {
+        //x.AddConsumer<>
+
+        if (consumersAssembly != null)
+        {
+          var consumerTypes = consumersAssembly.GetTypes()
+          .Where(t => typeof(IConsumer).IsAssignableFrom(t)
+            && t.IsClass);
+
+          foreach (var type in consumerTypes)
+          {
+            x.AddConsumer(type);
+          }
+        }
+        
+
         x.UsingRabbitMq((context, cfg) =>
         {
           cfg.Host(host, "/", h =>

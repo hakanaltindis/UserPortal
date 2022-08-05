@@ -1,7 +1,6 @@
 ﻿namespace UserPortal.Shared
 {
   public class Result<T> : Result
-    where T : class, new()
   {
     public Result(T obj)
       : base(true)
@@ -11,7 +10,7 @@
     public Result(string errorMessage)
       : base(errorMessage)
     {
-      Value = null;
+      Value = default;
     }
 
     public virtual T? Value { get; set; }
@@ -44,7 +43,6 @@
     }
 
     public static Result<T> Ok<T>(T val)
-      where T : class, new()
     {
       return new Result<T>(val);
     }
@@ -55,7 +53,6 @@
     }
 
     public static Result<T> Error<T>(string errorMessage)
-      where T : class, new()
     {
       return new Result<T>(errorMessage);
     }

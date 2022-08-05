@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UserPortal.Events.UserService
+﻿namespace UserPortal.Events.UserService
 {
-  public interface IUserRegistered
+  public class UserRegistered
   {
-    string UserName { get; set; }
-    string Password { get; set; }
-    string Email { get; set; }
-    string? SourceProvider { get; set; }
-    string? SourceKey { get; set; }
+    public string? Username { get; set; }
+    public string? Email { get; set; }
+    public string SourceProvider { get; set; } = string.Empty;
+    public string SourceKey { get; set; } = string.Empty;
   }
 }
